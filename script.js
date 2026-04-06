@@ -207,7 +207,7 @@ const DisplayController = (() => {
         // play again button
         const restartButton = document.createElement("button");
         restartButton.id = "restart";
-        restartButton.textContent = "Play Again?";
+        restartButton.textContent = "Play Again";
         resultsContainer.appendChild(restartButton);
         
         restartButton.addEventListener("click", () => {
@@ -222,6 +222,18 @@ const DisplayController = (() => {
     // allows players to click on a board square to place their marker
     const placeMarker = () => {
         gameCells.forEach((cell) => {
+            // add preview of the current player’s letter when hovered over cell
+            cell.addEventListener("mouseenter", () => {
+                if (Gameboard.gameboard[cell.id] === ' ') {
+                    cell.textContent = GameController.currentPlayerInfo().letter;
+                }
+            });
+            cell.addEventListener("mouseleave", () => {
+                if (Gameboard.gameboard[cell.id] === ' ') {
+                    cell.textContent = ' ';
+                }
+            });
+            
             cell.addEventListener("click", () => {
                 // set cell id as the array index 
                 const index = cell.id;
@@ -251,8 +263,10 @@ const DisplayController = (() => {
     };
 
     const startGame = () => {
+        // disable interaction with gameboard
+        disableBoard();
+
         const playerForm = document.querySelector("#player-form");
-        
         playerForm.addEventListener("submit", (e) => {
             e.preventDefault();
             const playerXName = document.querySelector("#playerX").value;
