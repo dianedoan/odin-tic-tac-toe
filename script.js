@@ -21,7 +21,7 @@ const Gameboard = (() => {
 })();
 
 // Player object
-const Player = (letter) => {
+const Player = (playerName, letter) => {
     let score = 0;
 
     // increment win score
@@ -34,13 +34,13 @@ const Player = (letter) => {
         return score;
     };
 
-    return { letter, playerWin, getScore };
+    return { playerName, letter, playerWin, getScore };
 };
 
 // Game object to control the flow of the game
 const GameController = (() => {
     // create players: X and O
-    const players = [Player('X'), Player('O')];
+    const players = [Player('player 1', 'X'), Player('player 2', 'O')];
 
     // randomize initial player
     const randomPlayerIndex= Math.floor(Math.random() * players.length);
@@ -70,7 +70,7 @@ const GameController = (() => {
             (board[6] === playerLetter) && (board[7] === playerLetter) && (board[8] === playerLetter)) {
             
             winner = currentPlayer;
-            return winner.letter;
+            return winner;
             
         } else if ( // vertical
             (board[0] === playerLetter) && (board[3] === playerLetter) && (board[6] === playerLetter) ||
@@ -78,14 +78,14 @@ const GameController = (() => {
             (board[2] === playerLetter) && (board[5] === playerLetter) && (board[8] === playerLetter)) {
             
             winner = currentPlayer;
-            return winner.letter;
+            return winner;
                 
         } else if ( // diagonal
             (board[0] === playerLetter) && (board[4] === playerLetter) && (board[8] === playerLetter) ||
             (board[6] === playerLetter) && (board[4] === playerLetter) && (board[2] === playerLetter)) {
             
             winner = currentPlayer;
-            return winner.letter;
+            return winner;
             
         } else if (!board.includes(' ')) { // tie: board is full
             winner = "tie";
@@ -126,7 +126,6 @@ const GameController = (() => {
 // object handles the display/DOM logic
 const DisplayController = (() => {
     const container = document.querySelector(".container");
-    const gameContainer = document.querySelector(".game-container");
     const gameCells = document.querySelectorAll(".game-cell");
     const resultsContainer = document.querySelector(".results-container");
     const gameResult = document.createElement("h2");
@@ -176,15 +175,14 @@ const DisplayController = (() => {
     };
 
     const renderGameInfo = () => {
-        // display current player on webpage
         const player = document.querySelector(".current-player");
-        player.textContent = `Player ${GameController.currentPlayerInfo().letter}'s turn`;
+        player.textContent = `Player ${GameController.currentPlayerInfo().playerName}'s turn`;
 
         // display player scores on webpage
         const playerXScore = document.querySelector(".playerX-score");
-        playerXScore.textContent = `Player ${GameController.playerInfo(0).letter}: ${GameController.playerInfo(0).getScore()}`
+        playerXScore.textContent = `Player ${GameController.playerInfo(0).playerName}: ${GameController.playerInfo(0).getScore()}`
         const playerOScore = document.querySelector(".playerO-score");
-        playerOScore.textContent = `Player ${GameController.playerInfo(1).letter}: ${GameController.playerInfo(1).getScore()}`
+        playerOScore.textContent = `Player ${GameController.playerInfo(1).playerName}: ${GameController.playerInfo(1).getScore()}`
 
         // display game result once game is finished
         const result = GameController.checkWinner();
@@ -202,7 +200,7 @@ const DisplayController = (() => {
         if (result === "tie") {
             gameResult.textContent = "Game over~ It's a tie!";
         } else {
-            gameResult.textContent = `Game over~ The winner is Player ${result}!`;
+            gameResult.textContent = `Game over~ The winner is Player ${result.playerName}!`;
         }
         resultsContainer.appendChild(gameResult);
         
@@ -251,8 +249,27 @@ const DisplayController = (() => {
         // display player move on gameboard
         placeMarker();
     };
+
+    const startGame = () => {
+        const playerForm = document.querySelector("#player-form");
+        
+        playerForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const playerXName = document.querySelector("#playerX").value;
+            const playerOName = document.querySelector("#playerO").value;
+        
+            const playerForm = document.querySelector("#player-form");
+            container.removeChild(playerForm);
+        
+            // display current player on webpage
+            GameController.playerInfo(0).playerName = playerXName;
+            GameController.playerInfo(1).playerName = playerOName;
+            
+            displayGame();
+        });
+    };
     
-    return { displayGame };
+    return { startGame };
 })();
 
-DisplayController.displayGame();
+DisplayController.startGame();
