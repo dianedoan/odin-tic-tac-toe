@@ -7,20 +7,6 @@ const Gameboard = (() => {
     //     ' ', ' ', ' '
     // ]; 
 
-    // // X win
-    // let gameboard = [
-    //     'X', 'O', 'O',
-    //     'X', 'O', 'X',
-    //     'X', 'X', 'O'
-    // ]; 
-
-    // // tie
-    // let gameboard = [
-    //     'X', 'X', 'O',
-    //     'X', 'O', 'X',
-    //     'O', 'X', 'O'
-    // ]; 
-
     let gameboard = [
         'X', ' ', ' ',
         ' ', 'X', 'O',
@@ -47,7 +33,6 @@ const Player = (letter) => {
     // increment win score
     const playerWin = () => {
         score++;
-        console.log(`Game over~ Player ${letter} wins!`);
     };
     
     // get current score
@@ -60,7 +45,6 @@ const Player = (letter) => {
 
 // Game object to control the flow of the game
 const GameController = (() => {
-    
     // create players: X and O
     const players = [Player('X'), Player('O')];
 
@@ -69,15 +53,19 @@ const GameController = (() => {
     const randomPlayer = players[randomPlayerIndex];
 
     let currentPlayer = randomPlayer;
-    let winner = null;
+    let winner;
     const board = Gameboard.gameboard;
     
     const switchPlayer = () => {
         currentPlayer = currentPlayer === players[0] ? players[1] : players[0];
     };
+
+    const currentPlayerInfo = () => {
+        return currentPlayer;
+    };
     
-    const displayScores = () => {
-        console.log(`The current score for Player ${players[0].letter} and Player ${players[1].letter} is ${players[0].getScore()} : ${players[1].getScore()}`);
+    const playerInfo = (playerIndex) => {
+        return players[playerIndex];
     };
     
     const checkWinner = () => {
@@ -89,6 +77,7 @@ const GameController = (() => {
             
             winner = currentPlayer;
             winner.playerWin();
+            return winner.letter;
             
         } else if ( // vertical
             (board[0] === playerLetter) && (board[3] === playerLetter) && (board[6] === playerLetter) ||
@@ -97,6 +86,7 @@ const GameController = (() => {
             
             winner = currentPlayer;
             winner.playerWin();
+            return winner.letter;
                 
         } else if ( // diagonal
             (board[0] === playerLetter) && (board[4] === playerLetter) && (board[8] === playerLetter) ||
@@ -104,69 +94,113 @@ const GameController = (() => {
             
             winner = currentPlayer;
             winner.playerWin();
+            return winner.letter;
             
         } else if (!board.includes(' ')) { // tie: board is full
             winner = "tie";
-            console.log(`Game over~ it's a tie!`);
+            return winner;
         }
+        return null;
     }
     
-    const playerTurn = () => {
+    const playTurn = (moveIndex) => {
         // player move
         const playerLetter = currentPlayer.letter;
-        // let moveIndex = prompt(`Player ${playerLetter} choose an index number to place ${playerLetter} on game board.`);
 
         // player move allowed only if array index is null
         if (board[moveIndex] === ' ') {
             Gameboard.placeMove(playerLetter, moveIndex);
         }
         
-        console.log(board);
-        
         // check if there is a winner or tie
-        checkWinner();
+        const result = checkWinner();
+
+        if (result != null) {
+            return; // stop game if finished
+        } 
         
         // switch to the other player's turn
         switchPlayer();
     }
     
-    const playGame = () => {
-        // keep playing until there is a winner or tie
-        while (!winner) {
-            playerTurn();
-        }
-
-        // display player scores
-        displayScores();
-        
-        // reset game
-        console.log(Gameboard.resetGameboard());
-    };
+    return { playTurn , currentPlayerInfo, playerInfo, checkWinner };
     
-    return { playGame };
-
 })();
-
-// GameController.playGame();
 
 // object handles the display/DOM logic
 const DisplayController = (() => {
-    const container = document.getElementsByClassName("container");
+    const container = document.querySelector(".container");
+    const gameContainer = document.querySelector(".game-container");
+    const gameCells = document.querySelectorAll(".game-cell");
     
     // renders the contents of the gameboard array to the webpage
     const renderGameboard = () => {
-        const gameCells = document.querySelectorAll(".game-cell");
         gameCells.forEach((cell) => {
             cell.textContent = `${Gameboard.gameboard[cell.id]}`;
+        });
+    };
+
+    const renderGameInfo = () => {
+        // display current player on webpage
+        const player = document.querySelector(".current-player");
+        player.textContent = `Player ${GameController.currentPlayerInfo().letter}'s turn`;
+
+        // display player scores on webpage
+        const playerXScore = document.querySelector(".playerX-score");
+        playerXScore.textContent = `Player ${GameController.playerInfo(0).letter}: ${GameController.playerInfo(0).getScore()}`
+        const playerOScore = document.querySelector(".playerO-score");
+        playerOScore.textContent = `Player ${GameController.playerInfo(1).letter}: ${GameController.playerInfo(1).getScore()}`
+
+        // display game result once game is over
+        const gameResult = document.createElement("h2");
+        gameResult.classList.add("game-result");
+        const result = GameController.checkWinner();
+
+        // game over
+        if (result !== null) {
+            if (result === "tie") {
+                gameResult.textContent = "Game over~ It's a tie!";
+            } else {
+                gameResult.textContent = `Game over~ The winner is ${result}!`;
+            }
+            container.appendChild(gameResult);
+
+            // disable interaction with game
+            gameContainer.style.pointerEvents = 'none';
+        }
+    };
+    
+    // allows players to click on a board square to place their marker
+    const placeMarker = () => {
+        gameCells.forEach((cell) => {
+            cell.addEventListener("click", () => {
+                // set cell id as the array index 
+                const index = cell.id;
+                
+                // play turn
+                GameController.playTurn(index);
+                
+                // render gameboard to webpage
+                renderGameboard();
+
+                // render player info and scores
+                renderGameInfo();
+            });
         });
     };
     
     // display game on webpage
     const displayGame = () => {
+        // render gameboard to webpage
         renderGameboard();
+        
+        // render player info and scores
+        renderGameInfo();
 
+        // display player move on gameboard
+        placeMarker();
     };
-
+    
     return { displayGame };
 })();
 
