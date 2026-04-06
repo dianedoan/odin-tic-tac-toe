@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', sans-serif;
+}
+
+body { 
+    background-color: #ebebeb;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 50px;
+}
+
+.game-container {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    padding: 30px;
+}
+
+.game-cell {
+    background-color: white;
+    border: 2px solid black;
+    font-size: 5rem;
+    text-align: center;
+}
+
+.game-cell:hover {
+    cursor: pointer;
+    background-color: #ebebeb;
+}
+
+button {
+    cursor: pointer;
+}
