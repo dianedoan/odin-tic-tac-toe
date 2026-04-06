@@ -1,17 +1,31 @@
 // Gameboard object
 const Gameboard = (() => {
     // 3 x 3 square
-    let gameboard = [
-        null, null, null,
-        null, null, null,
-        null, null, null
-    ]; 
+    // let gameboard = [
+    //     ' ', ' ', ' ',
+    //     ' ', ' ', ' ',
+    //     ' ', ' ', ' '
+    // ]; 
 
+    // // X win
     // let gameboard = [
     //     'X', 'O', 'O',
     //     'X', 'O', 'X',
-    //     null, 'X', 'O'
+    //     'X', 'X', 'O'
     // ]; 
+
+    // // tie
+    // let gameboard = [
+    //     'X', 'X', 'O',
+    //     'X', 'O', 'X',
+    //     'O', 'X', 'O'
+    // ]; 
+
+    let gameboard = [
+        'X', ' ', ' ',
+        ' ', 'X', 'O',
+        'O', ' ', ' '
+    ]; 
 
     // place X/O on specified gameboard area
     const placeMove = (letter, index) => {
@@ -20,7 +34,7 @@ const Gameboard = (() => {
 
     // reset gameboard
     const resetGameboard = () => {
-        return gameboard.fill(null);
+        return gameboard.fill(' ');
     };
 
     return { gameboard, placeMove, resetGameboard };
@@ -91,7 +105,7 @@ const GameController = (() => {
             winner = currentPlayer;
             winner.playerWin();
             
-        } else if (!board.includes(null)) { // tie: board is full
+        } else if (!board.includes(' ')) { // tie: board is full
             winner = "tie";
             console.log(`Game over~ it's a tie!`);
         }
@@ -100,10 +114,10 @@ const GameController = (() => {
     const playerTurn = () => {
         // player move
         const playerLetter = currentPlayer.letter;
-        let moveIndex = prompt(`Player ${playerLetter} choose an index number to place ${playerLetter} on game board.`);
-        
+        // let moveIndex = prompt(`Player ${playerLetter} choose an index number to place ${playerLetter} on game board.`);
+
         // player move allowed only if array index is null
-        if (board[moveIndex] === null) {
+        if (board[moveIndex] === ' ') {
             Gameboard.placeMove(playerLetter, moveIndex);
         }
         
@@ -133,5 +147,27 @@ const GameController = (() => {
 
 })();
 
-GameController.playGame();
+// GameController.playGame();
+
+// object handles the display/DOM logic
+const DisplayController = (() => {
+    const container = document.getElementsByClassName("container");
     
+    // renders the contents of the gameboard array to the webpage
+    const renderGameboard = () => {
+        const gameCells = document.querySelectorAll(".game-cell");
+        gameCells.forEach((cell) => {
+            cell.textContent = `${Gameboard.gameboard[cell.id]}`;
+        });
+    };
+    
+    // display game on webpage
+    const displayGame = () => {
+        renderGameboard();
+
+    };
+
+    return { displayGame };
+})();
+
+DisplayController.displayGame();
