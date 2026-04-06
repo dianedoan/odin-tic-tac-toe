@@ -1,16 +1,10 @@
 // Gameboard object
 const Gameboard = (() => {
     // 3 x 3 square
-    // let gameboard = [
-    //     ' ', ' ', ' ',
-    //     ' ', ' ', ' ',
-    //     ' ', ' ', ' '
-    // ]; 
-
     let gameboard = [
-        'X', ' ', ' ',
-        ' ', 'X', 'O',
-        'O', ' ', ' '
+        ' ', ' ', ' ',
+        ' ', ' ', ' ',
+        ' ', ' ', ' '
     ]; 
 
     // place X/O on specified gameboard area
@@ -76,7 +70,6 @@ const GameController = (() => {
             (board[6] === playerLetter) && (board[7] === playerLetter) && (board[8] === playerLetter)) {
             
             winner = currentPlayer;
-            winner.playerWin();
             return winner.letter;
             
         } else if ( // vertical
@@ -85,7 +78,6 @@ const GameController = (() => {
             (board[2] === playerLetter) && (board[5] === playerLetter) && (board[8] === playerLetter)) {
             
             winner = currentPlayer;
-            winner.playerWin();
             return winner.letter;
                 
         } else if ( // diagonal
@@ -93,7 +85,6 @@ const GameController = (() => {
             (board[6] === playerLetter) && (board[4] === playerLetter) && (board[2] === playerLetter)) {
             
             winner = currentPlayer;
-            winner.playerWin();
             return winner.letter;
             
         } else if (!board.includes(' ')) { // tie: board is full
@@ -112,12 +103,17 @@ const GameController = (() => {
             Gameboard.placeMove(playerLetter, moveIndex);
         }
         
-        // check if there is a winner or tie
+        // check for winner
         const result = checkWinner();
 
-        if (result != null) {
+        if (result != null && result != "tie") {
+            winner.playerWin(); // increment score of winner
             return; // stop game if finished
         } 
+
+        if (result === "tie") {
+            return;
+        }
         
         // switch to the other player's turn
         switchPlayer();
@@ -132,11 +128,50 @@ const DisplayController = (() => {
     const container = document.querySelector(".container");
     const gameContainer = document.querySelector(".game-container");
     const gameCells = document.querySelectorAll(".game-cell");
+    const resultsContainer = document.querySelector(".results-container");
+    const gameResult = document.createElement("h2");
+    gameResult.classList.add("game-result");
     
+    const disableBoard = () => {
+        gameCells.forEach(cell => {
+            cell.style.pointerEvents = 'none';
+        });
+    };
+
+    const enableBoard = () => {
+        gameCells.forEach(cell => {
+            cell.style.pointerEvents = 'auto';
+        });
+    };
+
+    const restartGameBoard = () => {
+        // reset gameboard array
+        Gameboard.resetGameboard();
+
+        // clear game result
+        resultsContainer.removeChild(gameResult);
+        
+        // render gameboard to webpage
+        renderGameboard();
+
+        // render player info and scores
+        renderGameInfo();
+        
+        // re-enable board
+        enableBoard();
+    };
+
     // renders the contents of the gameboard array to the webpage
     const renderGameboard = () => {
         gameCells.forEach((cell) => {
-            cell.textContent = `${Gameboard.gameboard[cell.id]}`;
+            const cellValue = Gameboard.gameboard[cell.id];
+            cell.textContent = `${cellValue}`;
+            
+            if (cellValue !== ' ') {
+                cell.style.pointerEvents = 'none'; // disable filled cells
+            } else {
+                cell.style.pointerEvents = 'auto'; // enable empty cells
+            }
         });
     };
 
@@ -151,23 +186,39 @@ const DisplayController = (() => {
         const playerOScore = document.querySelector(".playerO-score");
         playerOScore.textContent = `Player ${GameController.playerInfo(1).letter}: ${GameController.playerInfo(1).getScore()}`
 
-        // display game result once game is over
-        const gameResult = document.createElement("h2");
-        gameResult.classList.add("game-result");
+        // display game result once game is finished
         const result = GameController.checkWinner();
 
-        // game over
         if (result !== null) {
-            if (result === "tie") {
-                gameResult.textContent = "Game over~ It's a tie!";
-            } else {
-                gameResult.textContent = `Game over~ The winner is ${result}!`;
-            }
-            container.appendChild(gameResult);
-
-            // disable interaction with game
-            gameContainer.style.pointerEvents = 'none';
+            renderResults(result);
         }
+    };
+    
+    const renderResults = (result) => {
+        // disable interaction with gameboard
+        disableBoard();
+        
+        // display game results
+        if (result === "tie") {
+            gameResult.textContent = "Game over~ It's a tie!";
+        } else {
+            gameResult.textContent = `Game over~ The winner is Player ${result}!`;
+        }
+        resultsContainer.appendChild(gameResult);
+        
+        // play again button
+        const restartButton = document.createElement("button");
+        restartButton.id = "restart";
+        restartButton.textContent = "Play Again?";
+        resultsContainer.appendChild(restartButton);
+        
+        restartButton.addEventListener("click", () => {
+            // remove button
+            resultsContainer.removeChild(restartButton);
+            
+            // restart game
+            restartGameBoard();
+        });
     };
     
     // allows players to click on a board square to place their marker
