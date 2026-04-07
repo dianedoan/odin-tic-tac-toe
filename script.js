@@ -130,36 +130,39 @@ const DisplayController = (() => {
     const resultsContainer = document.querySelector(".results-container");
     const gameResult = document.createElement("h2");
     gameResult.classList.add("game-result");
+    const buttonsContainer = document.querySelector(".buttons-container");
     
     const disableBoard = () => {
         gameCells.forEach(cell => {
             cell.style.pointerEvents = 'none';
         });
     };
-
+    
     const enableBoard = () => {
         gameCells.forEach(cell => {
             cell.style.pointerEvents = 'auto';
         });
     };
-
+    
     const restartGameBoard = () => {
         // reset gameboard array
         Gameboard.resetGameboard();
-
-        // clear game result
-        resultsContainer.removeChild(gameResult);
         
         // render gameboard to webpage
         renderGameboard();
-
+        
         // render player info and scores
         renderGameInfo();
         
         // re-enable board
         enableBoard();
+        
+        // clear game result
+        gameResult.textContent = "";
+        resultsContainer.appendChild(gameResult);
+        resultsContainer.removeChild(gameResult);
     };
-
+    
     // renders the contents of the gameboard array to the webpage
     const renderGameboard = () => {
         gameCells.forEach((cell) => {
@@ -203,20 +206,6 @@ const DisplayController = (() => {
             gameResult.textContent = `Game over~ The winner is Player ${result.playerName}!`;
         }
         resultsContainer.appendChild(gameResult);
-        
-        // play again button
-        const restartButton = document.createElement("button");
-        restartButton.id = "restart";
-        restartButton.textContent = "Play Again";
-        resultsContainer.appendChild(restartButton);
-        
-        restartButton.addEventListener("click", () => {
-            // remove button
-            resultsContainer.removeChild(restartButton);
-            
-            // restart game
-            restartGameBoard();
-        });
     };
     
     // allows players to click on a board square to place their marker
@@ -252,6 +241,15 @@ const DisplayController = (() => {
     
     // display game on webpage
     const displayGame = () => {
+        // add restart button
+        const restartButton = document.createElement("button");
+        restartButton.textContent = "Restart Game";
+        buttonsContainer.appendChild(restartButton);
+        restartButton.addEventListener("click", () => {
+            restartGameBoard();
+
+        });
+
         // render gameboard to webpage
         renderGameboard();
         

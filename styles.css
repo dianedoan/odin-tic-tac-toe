@@ -21,7 +21,7 @@ body {
     display: grid;
     grid-template-columns: repeat(3, 100px);
     grid-template-rows: repeat(3, 100px);
-    padding: 30px;
+    padding: 20px;
 }
 
 .game-cell {
@@ -40,6 +40,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    text-align: center;
     gap: 5px;
 }
 
@@ -73,6 +74,13 @@ input {
 
 input:focus {
     border: 2px solid #b3e3ff;
+}
+
+.buttons-container {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    padding-top: 10px;
 }
 
 button {
